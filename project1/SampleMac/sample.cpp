@@ -173,8 +173,8 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
-GLuint	BoxList;				// object display list
 GLuint	PyramidList;	// object display list
+GLuint PlatformList; // object display list
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -443,13 +443,14 @@ Display( )
 
 	// glCallList( BoxList );
 	glCallList( PyramidList );
+	glCallList( PlatformList );
+	
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
 	{
 		glPushMatrix( );
 			glRotatef( 90.f,   0.f, 1.f, 0.f );
-			glCallList( BoxList );
 			glCallList( PyramidList )
 		glPopMatrix( );
 	}
@@ -816,11 +817,10 @@ InitLists( )
 	if (DebugOn != 0)
 		fprintf(stderr, "Starting InitLists.\n");
 
-		float baseWidth = 2.50f;
+		float baseWidth = 3.25f;
     float topWidth = 1.50f;
     float height = 2.0f;
 
-    // Start a new list
     PyramidList = glGenLists(1);
     glNewList(PyramidList, GL_COMPILE);
 
@@ -828,27 +828,27 @@ InitLists( )
 
     glBegin(GL_QUADS);
 
-    // Draw the base (bottom square)
+		// Base
+		glColor3f(0.1, 0, 1);
     glVertex3f(-baseWidth / 2, 0, -baseWidth / 2);
     glVertex3f( baseWidth / 2, 0, -baseWidth / 2);
     glVertex3f( baseWidth / 2, 0,  baseWidth / 2);
     glVertex3f(-baseWidth / 2, 0,  baseWidth / 2);
 
-    // Draw the top (upper square)
+		glColor3f(0.38, 0, 1);
     glVertex3f(-topWidth / 2, height, -topWidth / 2);
     glVertex3f( topWidth / 2, height, -topWidth / 2);
     glVertex3f( topWidth / 2, height,  topWidth / 2);
     glVertex3f(-topWidth / 2, height,  topWidth / 2);
 
-    // Draw the 4 sides (connecting the top and bottom)
     // Side 1
+		glColor3f(0.79, 0, 1);
     glVertex3f(-baseWidth / 2, 0, -baseWidth / 2);
     glVertex3f(-topWidth / 2, height, -topWidth / 2);
     glVertex3f( topWidth / 2, height, -topWidth / 2);
     glVertex3f( baseWidth / 2, 0, -baseWidth / 2);
 
     // Side 2
-    // (Similar to side 1 but coordinates changed for the different face)
 		glVertex3f( baseWidth / 2, 0, -baseWidth / 2);
 		glVertex3f( topWidth / 2, height, -topWidth / 2);
 		glVertex3f( topWidth / 2, height,  topWidth / 2);
@@ -860,70 +860,62 @@ InitLists( )
 		glVertex3f(-topWidth / 2, height,  topWidth / 2);
 		glVertex3f(-baseWidth / 2, 0,  baseWidth / 2);
 
-
-
     glEnd();
 
     glEndList();
 
-	// float dx = BOXSIZE / 2.f;
-	// float dy = BOXSIZE / 2.f;
-	// float dz = BOXSIZE / 2.f;
-	// glutSetWindow( MainWindow );
+		PlatformList = glGenLists(1);
+		glNewList(PlatformList, GL_COMPILE);
 
-	// // create the object:
+			glBegin(GL_QUADS);
 
-	// BoxList = glGenLists( 1 );
-	// glNewList( BoxList, GL_COMPILE );
+			float platformHeight = 0.5f;  // Adjust this as needed
+			float platformWidth  = 1.25f;  // Width of the platform. Adjust this as needed
+			float platformDepth  = 1.0f;  // Depth of the platform. Adjust this as needed
 
-	// 	glBegin( GL_QUADS );
+			float platformBaseHeight = height;  
 
-	// 		glColor3f( 1., 0., 0. );
+			glColor3f(0.5, 0.5, 0.5); 
 
-	// 			glNormal3f( 1., 0., 0. );
-	// 				glVertex3f(  dx, -dy,  dz );
-	// 				glVertex3f(  dx, -dy, -dz );
-	// 				glVertex3f(  dx,  dy, -dz );
-	// 				glVertex3f(  dx,  dy,  dz );
+			// Bottom face of the platform
+			glVertex3f(-platformWidth / 2, platformBaseHeight, -platformDepth / 2);
+			glVertex3f( platformWidth / 2, platformBaseHeight, -platformDepth / 2);
+			glVertex3f( platformWidth / 2, platformBaseHeight,  platformDepth / 2);
+			glVertex3f(-platformWidth / 2, platformBaseHeight,  platformDepth / 2);
 
-	// 			glNormal3f(-1., 0., 0.);
-	// 				glVertex3f( -dx, -dy,  dz);
-	// 				glVertex3f( -dx,  dy,  dz );
-	// 				glVertex3f( -dx,  dy, -dz );
-	// 				glVertex3f( -dx, -dy, -dz );
+			// Top face of the platform
+			glVertex3f(-platformWidth / 2, platformBaseHeight + platformHeight, -platformDepth / 2);
+			glVertex3f( platformWidth / 2, platformBaseHeight + platformHeight, -platformDepth / 2);
+			glVertex3f( platformWidth / 2, platformBaseHeight + platformHeight,  platformDepth / 2);
+			glVertex3f(-platformWidth / 2, platformBaseHeight + platformHeight,  platformDepth / 2);
 
-	// 		glColor3f( 0., 1., 0. );
+			// Front
+			glVertex3f(-platformWidth / 2, platformBaseHeight, -platformDepth / 2);
+			glVertex3f(-platformWidth / 2, platformBaseHeight + platformHeight, -platformDepth / 2);
+			glVertex3f( platformWidth / 2, platformBaseHeight + platformHeight, -platformDepth / 2);
+			glVertex3f( platformWidth / 2, platformBaseHeight, -platformDepth / 2);
+			
+			// Right
+			glVertex3f( platformWidth/2, platformBaseHeight, -platformDepth/2);
+			glVertex3f( platformWidth/2, platformBaseHeight + platformHeight, -platformDepth/2);
+			glVertex3f( platformWidth/2, platformBaseHeight + platformHeight,  platformDepth/2);
+			glVertex3f( platformWidth/2, platformBaseHeight,  platformDepth/2);
 
-	// 			glNormal3f(0., 1., 0.);
-	// 				glVertex3f( -dx,  dy,  dz );
-	// 				glVertex3f(  dx,  dy,  dz );
-	// 				glVertex3f(  dx,  dy, -dz );
-	// 				glVertex3f( -dx,  dy, -dz );
+			// Back
+			glVertex3f( platformWidth/2, platformBaseHeight, platformDepth/2);
+			glVertex3f( platformWidth/2, platformBaseHeight + platformHeight, platformDepth/2);
+			glVertex3f(-platformWidth/2, platformBaseHeight + platformHeight, platformDepth/2);
+			glVertex3f(-platformWidth/2, platformBaseHeight, platformDepth/2);
 
-	// 			glNormal3f(0., -1., 0.);
-	// 				glVertex3f( -dx, -dy,  dz);
-	// 				glVertex3f( -dx, -dy, -dz );
-	// 				glVertex3f(  dx, -dy, -dz );
-	// 				glVertex3f(  dx, -dy,  dz );
+			// Left
+			glVertex3f(-platformWidth/2, platformBaseHeight, platformDepth/2);
+			glVertex3f(-platformWidth/2, platformBaseHeight + platformHeight, platformDepth/2);
+			glVertex3f(-platformWidth/2, platformBaseHeight + platformHeight, -platformDepth/2);
+			glVertex3f(-platformWidth/2, platformBaseHeight, -platformDepth/2);
 
-	// 		glColor3f(0., 0., 1.);
+			glEnd();
 
-	// 			glNormal3f(0., 0., 1.);
-	// 				glVertex3f(-dx, -dy, dz);
-	// 				glVertex3f( dx, -dy, dz);
-	// 				glVertex3f( dx,  dy, dz);
-	// 				glVertex3f(-dx,  dy, dz);
-
-	// 			glNormal3f(0., 0., -1.);
-	// 				glVertex3f(-dx, -dy, -dz);
-	// 				glVertex3f(-dx,  dy, -dz);
-	// 				glVertex3f( dx,  dy, -dz);
-	// 				glVertex3f( dx, -dy, -dz);
-
-	// 	glEnd( );
-
-	// glEndList( );
-
+	glEndList();	
 
 	// create the axes:
 
